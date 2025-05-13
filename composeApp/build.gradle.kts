@@ -55,8 +55,8 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb,
                 TargetFormat.Exe, TargetFormat.AppImage)
-            packageName = "TimeTracker"
             packageVersion = version.toString()
+            packageName = "TimeTracker_$packageVersion"
         }
     }
 }
