@@ -5,8 +5,6 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 
 object UiConstants {
-    val PADDING_VERY_SMALL = 2.dp
-    val PADDING_SMALL = 4.dp
     val SPACER_HEIGHT_DEFAULT = 8.dp
     val SPACER_HEIGHT_LARGE = 16.dp
 

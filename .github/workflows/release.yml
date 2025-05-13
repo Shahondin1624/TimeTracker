@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ env.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Get version
+        id: get_version
+        run: |
+          version=$(./gradlew -q printVersion)
+          echo "version=$version" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.version }}
+          release_name: Release v${{ env.version }}
+          draft: false
+          prerelease: false
+
+  build-linux:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Get version
+        id: get_version
+        run: |
+          version=$(./gradlew -q printVersion)
+          echo "version=$version" >> $GITHUB_ENV
+
+      - name: Build for Linux
+        run: |
+          ./gradlew :composeApp:packageReleaseDistributionForCurrentOS
+
+      - name: Upload Linux .AppImage
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: composeApp/build/compose/binaries/main-release/app/TimeTracker/bin/TimeTracker_${{ env.version }
+          asset_name: TimeTracker_${{ env.version }}.AppImage
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux .deb
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: composeApp/build/compose/binaries/main-release/deb/timetracker_${{ env.version }}_amd64.deb
+          asset_name: TimeTracker_${{ env.version }}.deb
+          asset_content_type: application/octet-stream
+
+  build-windows:
+    needs: create-release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Get version
+        id: get_version
+        run: |
+          $version = ./gradlew.bat -q printVersion
+          echo "version=$version" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Build for Windows
+        run: |
+          ./gradlew :composeApp:packageReleaseDistributionForCurrentOS -PtargetOs=windows
+
+      - name: Upload Windows .exe
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: composeApp/build/compose/binaries/main-release/exe/TimeTracker-${{ env.version }}.exe
+          asset_name: TimeTracker_${{ env.version }}.exe
+          asset_content_type: application/octet-stream
