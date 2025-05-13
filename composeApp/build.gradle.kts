@@ -56,7 +56,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb,
                 TargetFormat.Exe, TargetFormat.AppImage)
             packageVersion = version.toString()
-            packageName = "TimeTracker_$packageVersion"
+            packageName = "TimeTracker"
         }
     }
 }
