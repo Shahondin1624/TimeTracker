@@ -57,6 +57,15 @@ compose.desktop {
                 TargetFormat.Exe, TargetFormat.AppImage)
             packageVersion = version.toString()
             packageName = "TimeTracker"
+
+            windows {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/Hourglass_Win.ico"))
+            }
+
+            linux {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/Hourglass.svg"))
+            }
+
         }
     }
 }
