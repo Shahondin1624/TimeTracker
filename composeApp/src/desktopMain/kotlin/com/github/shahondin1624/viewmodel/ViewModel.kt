@@ -45,4 +45,8 @@ class TimeTrackerViewModel : ViewModel() {
             it.copy(stories = it.stories.updateStoryTitle(index, newTitle))
         }
     }
+
+    fun indexOfStillTrackingStory(): Int {
+        return uiState.value.stories.stories.indexOfFirst { it.isTracking }
+    }
 }

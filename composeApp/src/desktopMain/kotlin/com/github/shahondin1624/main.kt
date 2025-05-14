@@ -6,6 +6,9 @@ import com.github.shahondin1624.composables.App
 import com.github.shahondin1624.viewmodel.TimeTrackerUiState
 import com.github.shahondin1624.viewmodel.TimeTrackerViewModel
 import mu.KotlinLogging
+import org.jetbrains.compose.resources.painterResource
+import timetracker.composeapp.generated.resources.Hourglass_Win
+import timetracker.composeapp.generated.resources.Res
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -23,10 +26,12 @@ fun main(args: Array<String>) = application {
             } else {
                 getTrackedTimesFile()
             }
+            saveAllTracking(viewModel)
             saveViewModelToFile(viewModel, fileToStoreIn)
             exitApplication()
         },
         title = "TimeTracker",
+        icon = painterResource(Res.drawable.Hourglass_Win),
     ) {
         App(vm = viewModel)
     }
@@ -109,5 +114,13 @@ private fun saveViewModelToFile(viewModel: TimeTrackerViewModel, trackedTimesFil
         logger.info { "Saved tracked times to file: ${trackedTimesFile.absolutePath}" }
     } catch (e: IOException) {
         logger.error(e) { "Failed to save tracked times to file: ${trackedTimesFile.absolutePath}" }
+    }
+}
+
+private fun saveAllTracking(viewModel: TimeTrackerViewModel) {
+    viewModel.indexOfStillTrackingStory().let { index ->
+        if (index != -1) {
+            viewModel.toggleTracking(index)
+        }
     }
 }
