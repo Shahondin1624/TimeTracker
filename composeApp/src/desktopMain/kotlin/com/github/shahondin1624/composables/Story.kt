@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -47,40 +47,61 @@ fun Story(stories: Stories, vm: TimeTrackerViewModel, index: Int) {
     var showContextMenu by remember { mutableStateOf(false) }
     var showEditTitleDialog by remember { mutableStateOf(false) }
 
-    Box {
-        layoutRow(
-            rowModifier = Modifier.onPointerEvent(PointerEventType.Press) {
-                if (it.buttons.isSecondaryPressed) {
-                    showContextMenu = true
-                }
-            },
-            column1 = { Text(text = story.title) },
-            column2 = { Text(formatWorkTime(totalTimeTracked)) },
-            column3 = { Text(formatWorkTime(timeTrackedToday)) },
-            column4 = {
-                ElapsedTimeColumn(story)
-            },
-            column5 = {
-                val isTracking = story.isTracking
-                val icon = if (isTracking) Res.drawable.Stop else Res.drawable.Timer
-                logger.debug { "Setting icon for story ${story.title}: ${if (isTracking) "Stop" else "Start"}" }
-                IconButton(onClick = { toggleStory(vm, index) }) {
-                    Icon(
-                        painter = painterResource(icon),
-                        contentDescription = if (isTracking) "Stop" else "Start"
+    Surface(color = MaterialTheme.colorScheme.background) {
+        Box {
+            layoutRow(
+                rowModifier = Modifier.onPointerEvent(PointerEventType.Press) {
+                    if (it.buttons.isSecondaryPressed) {
+                        showContextMenu = true
+                    }
+                },
+                column1 = {
+                    Text(
+                        text = story.title,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(vertical = SPACER_HEIGHT_DEFAULT)
                     )
+                },
+                column2 = {
+                    Text(
+                        formatWorkTime(totalTimeTracked),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(vertical = SPACER_HEIGHT_DEFAULT)
+                    )
+                },
+                column3 = {
+                    Text(
+                        formatWorkTime(timeTrackedToday),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(vertical = SPACER_HEIGHT_DEFAULT)
+                    )
+                },
+                column4 = {
+                    ElapsedTimeColumn(story)
+                },
+                column5 = {
+                    val isTracking = story.isTracking
+                    val icon = if (isTracking) Res.drawable.Stop else Res.drawable.Timer
+                    logger.debug { "Setting icon for story ${story.title}: ${if (isTracking) "Stop" else "Start"}" }
+                    IconButton(onClick = { toggleStory(vm, index) }) {
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = if (isTracking) "Stop" else "Start",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-            }
-        )
-        ContextMenu(
-            showContextMenu = showContextMenu,
-            hideContextMenu = { showContextMenu = false },
-            showEditTitleDialog = showEditTitleDialog,
-            setShowEditTitleDialog = { showEditTitleDialog = it },
-            vm = vm,
-            index = index,
-            story = story
-        )
+            )
+            ContextMenu(
+                showContextMenu = showContextMenu,
+                hideContextMenu = { showContextMenu = false },
+                showEditTitleDialog = showEditTitleDialog,
+                setShowEditTitleDialog = { showEditTitleDialog = it },
+                vm = vm,
+                index = index,
+                story = story
+            )
+        }
     }
 }
 
@@ -98,18 +119,20 @@ private fun ContextMenu(
         expanded = showContextMenu,
         onDismissRequest = hideContextMenu
     ) {
-        DropdownMenuItem(onClick = {
-            setShowEditTitleDialog(true)
-            hideContextMenu()
-        }) {
-            Text("Edit Title")
-        }
-        DropdownMenuItem(onClick = {
-            vm.deleteStory(index)
-            hideContextMenu()
-        }) {
-            Text("Delete")
-        }
+        DropdownMenuItem(
+            text = { Text("Edit Title", color = MaterialTheme.colorScheme.onSurface) },
+            onClick = {
+                setShowEditTitleDialog(true)
+                hideContextMenu()
+            }
+        )
+        DropdownMenuItem(
+            text = { Text("Delete", color = MaterialTheme.colorScheme.onSurface) },
+            onClick = {
+                vm.deleteStory(index)
+                hideContextMenu()
+            }
+        )
     }
 
     if (showEditTitleDialog) {
@@ -135,7 +158,7 @@ private fun ElapsedTimeColumn(story: Story) {
             }
         }
 
-        Text(formatWorkTime(elapsed))
+        Text(formatWorkTime(elapsed), color = MaterialTheme.colorScheme.onBackground)
     } else {
         logger.debug { "Story ${story.title} not tracking, no elapsed time to display" }
     }
@@ -153,13 +176,20 @@ private fun ShowEditStoryTitleDialog(
         onDismissRequest = {
             close()
         },
-        title = { Text("Edit Story Title") },
+        title = { Text("Edit Story Title", color = MaterialTheme.colorScheme.onSurface) },
         text = {
             TextField(
                 value = newTitle,
                 onValueChange = { newTitle = it },
-                label = { Text("Title") },
-                singleLine = true
+                label = { Text("Title", color = MaterialTheme.colorScheme.onSurface) },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
         },
         confirmButton = {
@@ -171,7 +201,7 @@ private fun ShowEditStoryTitleDialog(
                     }
                 }
             ) {
-                Text("Save")
+                Text("Save", color = MaterialTheme.colorScheme.onPrimary)
             }
         },
         dismissButton = {
@@ -180,7 +210,7 @@ private fun ShowEditStoryTitleDialog(
                     close()
                 }
             ) {
-                Text("Cancel")
+                Text("Cancel", color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     )
@@ -200,23 +230,29 @@ fun layoutRow(
     column5: (@Composable () -> Unit)? = null,
     rowModifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = rowModifier.fillMaxWidth().padding(SPACER_HEIGHT_DEFAULT)
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small
     ) {
-        Box(modifier = Modifier.weight(TITLE_COLUMN_WEIGHT)) {
-            column1?.invoke()
-        }
-        Box(modifier = Modifier.weight(TOTAL_COLUMN_WEIGHT)) {
-            column2?.invoke()
-        }
-        Box(modifier = Modifier.weight(TOTAL_TODAY_COLUMN_WEIGHT)) {
-            column3?.invoke()
-        }
-        Box(modifier = Modifier.weight(ELAPSED_COLUMN_WEIGHT)) {
-            column4?.invoke()
-        }
-        Box(modifier = Modifier.weight(RECORD_COLUMN_WEIGHT)) {
-            column5?.invoke()
+    Row(
+            modifier = rowModifier.fillMaxWidth().padding(SPACER_HEIGHT_DEFAULT)
+        ) {
+            Box(modifier = Modifier.weight(TITLE_COLUMN_WEIGHT)) {
+                column1?.invoke()
+            }
+            Box(modifier = Modifier.weight(TOTAL_COLUMN_WEIGHT)) {
+                column2?.invoke()
+            }
+            Box(modifier = Modifier.weight(TOTAL_TODAY_COLUMN_WEIGHT)) {
+                column3?.invoke()
+            }
+            Box(modifier = Modifier.weight(ELAPSED_COLUMN_WEIGHT)) {
+                column4?.invoke()
+            }
+            Box(modifier = Modifier.weight(RECORD_COLUMN_WEIGHT)) {
+                column5?.invoke()
+            }
         }
     }
 }

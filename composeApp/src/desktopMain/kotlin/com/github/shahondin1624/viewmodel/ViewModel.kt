@@ -49,4 +49,10 @@ class TimeTrackerViewModel : ViewModel() {
     fun indexOfStillTrackingStory(): Int {
         return uiState.value.stories.stories.indexOfFirst { it.isTracking }
     }
+
+    fun toggleDarkMode() {
+        _uiState.update {
+            it.copy(isDarkMode = !it.isDarkMode)
+        }
+    }
 }
