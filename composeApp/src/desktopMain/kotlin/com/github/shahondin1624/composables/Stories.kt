@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import com.github.shahondin1624.UiConstants.SPACER_HEIGHT_DEFAULT
 import com.github.shahondin1624.UiConstants.SPACER_HEIGHT_LARGE
 import com.github.shahondin1624.formatWorkTime
+import com.github.shahondin1624.getTotalTrackedSecondsWithOffset
 import com.github.shahondin1624.viewmodel.TimeTrackerViewModel
 import java.time.LocalDateTime
 
@@ -82,16 +83,12 @@ private fun CreateAddNewItemRow(vm: TimeTrackerViewModel, newStoryName: String, 
             )
         },
         column2 = {
-            val totalTimeTracked =
+            val totalTimeTrackedWithOffset =
                 uiState.value.stories.stories.sumOf { story ->
-                    story.trackedTimes
-                        .filter { it.endTime != null }
-                        .sumOf {
-                        it.endTime!!.toEpochSecond() - it.startTime.toEpochSecond()
-                    }
+                    getTotalTrackedSecondsWithOffset(story)
                 }
             Text(
-                text = formatWorkTime(totalTimeTracked),
+                text = formatWorkTime(totalTimeTrackedWithOffset),
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(vertical = SPACER_HEIGHT_DEFAULT)
             )
