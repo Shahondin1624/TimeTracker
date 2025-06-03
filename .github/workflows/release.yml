@@ -61,16 +61,6 @@ jobs:
         run: |
           ./gradlew :composeApp:packageReleaseDistributionForCurrentOS
 
-#      - name: Upload Linux .AppImage
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ needs.create-release.outputs.upload_url }}
-#          asset_path: composeApp/build/compose/binaries/main-release/app/TimeTracker/bin/TimeTracker
-#          asset_name: TimeTracker_${{ env.version }}.AppImage
-#          asset_content_type: application/octet-stream
-
       - name: Upload Linux .deb
         uses: actions/upload-release-asset@v1.0.2
         env:
@@ -79,6 +69,42 @@ jobs:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: composeApp/build/compose/binaries/main-release/deb/timetracker_${{ env.version }}_amd64.deb
           asset_name: TimeTracker_${{ env.version }}.deb
+          asset_content_type: application/octet-stream
+
+  build-fedora:
+    needs: create-release
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y git java-21-openjdk-devel
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Get version
+        id: get_version
+        run: |
+          version=$(./gradlew -q printVersion)
+          echo "version=$version" >> $GITHUB_ENV
+
+      - name: Build for Fedora (RPM)
+        run: |
+          ./gradlew :composeApp:packageReleaseDistributionForCurrentOS
+
+      - name: Upload Fedora .rpm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: composeApp/build/compose/binaries/main-release/rpm/timetracker-${{ env.version }}-1.x86_64.rpm
+          asset_name: TimeTracker_${{ env.version }}.rpm
           asset_content_type: application/octet-stream
 
   build-windows:
