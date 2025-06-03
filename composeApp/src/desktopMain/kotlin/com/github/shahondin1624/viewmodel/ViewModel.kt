@@ -1,6 +1,7 @@
 package com.github.shahondin1624.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.github.shahondin1624.Modification
 import com.github.shahondin1624.Story
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +44,22 @@ class TimeTrackerViewModel : ViewModel() {
     fun updateStoryTitle(index: Int, newTitle: String) {
         _uiState.update {
             it.copy(stories = it.stories.updateStoryTitle(index, newTitle))
+        }
+    }
+
+    fun indexOfStillTrackingStory(): Int {
+        return uiState.value.stories.stories.indexOfFirst { it.isTracking }
+    }
+
+    fun toggleDarkMode() {
+        _uiState.update {
+            it.copy(isDarkMode = !it.isDarkMode)
+        }
+    }
+
+    fun addOffset(offset: Modification, index: Int) {
+        _uiState.update {
+            it.copy(stories = it.stories.addOffset(offset, index))
         }
     }
 }

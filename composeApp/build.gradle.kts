@@ -26,9 +26,9 @@ kotlin {
             implementation(libs.kotlin.logging)
             implementation(libs.logback.classic)
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-            runtimeOnly("org.jetbrains.compose.material3:material3-desktop:1.7.3")
+            implementation("org.jetbrains.compose.material3:material3-desktop:1.7.3")
             // https://mvnrepository.com/artifact/org.jetbrains.compose.material/material-icons-extended
-            runtimeOnly("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs) {
@@ -57,6 +57,15 @@ compose.desktop {
                 TargetFormat.Exe, TargetFormat.AppImage)
             packageVersion = version.toString()
             packageName = "TimeTracker"
+
+            windows {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/Hourglass_Win.ico"))
+            }
+
+            linux {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/Hourglass.svg"))
+            }
+
         }
     }
 }

@@ -33,6 +33,7 @@ data class Story(
     val title: String,
     val trackedTimes: List<TrackedTime> = emptyList(),
     val isTracking: Boolean = false,
+    val offsets: List<Modification>  = emptyList(),
 ) {
     fun startTracking(): Story {
         logger.debug { "startTracking called for story: $title, current tracking status: $isTracking" }
@@ -66,6 +67,11 @@ data class Story(
             return this
         }
     }
+
+    fun addOffset(offset: Modification): Story {
+        logger.debug { "addOffset called for story: $title, current offset: $offset" }
+        return this.copy(offsets =  this.offsets + offset)
+    }
 }
 
 @Serializable
@@ -75,6 +81,14 @@ data class TrackedTime(
     @Serializable(with = ZonedDateTimeSerializer::class)
     val endTime: ZonedDateTime?,
 )
+
+@Serializable
+data class Modification(
+    @Serializable(with = ZonedDateTimeSerializer::class)
+    val modificationTime: ZonedDateTime,
+    val millisOffset: Long
+)
+
 @Serializable
 data class Stories(val stories: List<Story> = emptyList()) {
     fun addStory(story: Story): Stories {
@@ -126,6 +140,18 @@ data class Stories(val stories: List<Story> = emptyList()) {
             if (i == index) {
                 logger.debug { "Updating title for story at index $i from '${story.title}' to '$newTitle'" }
                 story.copy(title = newTitle)
+            } else {
+                story
+            }
+        }
+        return copy(stories = newStories)
+    }
+
+    fun addOffset(offset: Modification, index: Int): Stories {
+        logger.debug { "addOffset called with offset: $offset, index: $index" }
+        val newStories = stories.mapIndexed { i, story ->
+            if (i == index) {
+                story.addOffset(offset)
             } else {
                 story
             }

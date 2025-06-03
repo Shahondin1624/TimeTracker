@@ -23,3 +23,16 @@ enum class OS {
     WINDOWS, LINUX
 }
 
+fun getTotalTrackedSeconds(story: Story): Long {
+    return story.trackedTimes.filter { it.endTime != null }
+        .sumOf { it.endTime!!.toEpochSecond() - it.startTime.toEpochSecond() }
+}
+
+fun getTotalOffset(story: Story): Long {
+    return story.offsets.sumOf { it.millisOffset / 1000 }
+}
+
+fun getTotalTrackedSecondsWithOffset(story: Story): Long {
+    return getTotalTrackedSeconds(story) + getTotalOffset(story)
+}
+
